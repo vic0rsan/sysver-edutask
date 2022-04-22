@@ -3,36 +3,52 @@ import unittest.mock as mock
 
 from src.controllers.usercontroller import UserController
 
-@pytest.fixture
-def sut(email: str, usersLen: int):
-    mockedUserController = mock.MagicMock()
-    users = []
-    for i in range(usersLen):
-        users.append({'email': email})
-    mockedUserController.find.return_value = users
-    mockedSut = UserController(dao=mockedUserController)
-    return mockedSut
+def test_valid_email_format():
+    mockedDao = mock.MagicMock()
+    mockedDao.find.return_value = [{'email': 'jane.doe@gmail.com'}]
 
-@pytest.mark.demo
-@pytest.mark.parametrize('email, expected, usersLen', [('jane.doe@gmail.com', {'email': 'jane.doe@gmail.com'}, 1), ('jane.doe@gmail.com', {'email': 'jane.doe@gmail.com'}, 2)])
-def test_get_user_by_email(sut, expected):
-    '''Test valid email inputs'''
-    email = "jane.doe@gmail.com"
-    emailRes = sut.get_user_by_email(email)
-    assert emailRes == expected
+    mockedSut = UserController(dao=mockedDao)
+    expect = mockedSut.get_user_by_email("jane.doe@gmail.com")
 
-@pytest.mark.demo
-@pytest.mark.parametrize('email, usersLen', [('jane.doe.gmail.com', 0)])
-def test_invalid_email(sut):
-    '''Test invalid email input by changing "@" with "."'''
-    email = "jane.doe.gmail.com"
+    assert expect == mockedDao.find()[0]
+
+def test_invalid_email_format():
+    mockedDao = mock.MagicMock()
+    mockedDao.find.return_value = [{}] #Invalid format of emails should not return anything!
+
+    mockedSut = UserController(dao=mockedDao)
+    expect = {}
     with pytest.raises(ValueError):
-        sut.get_user_by_email(email)
+        expect = mockedSut.get_user_by_email("jane.doe.gmail.com")
 
-@pytest.mark.demo
-@pytest.mark.parametrize('email, expected, usersLen', [('jane.doe@gmail.com', None, 0)])
-def test_valid_email_blank_db(sut, expected):
-    '''Test valid email with blank db/filter response'''
-    email = "tom.doe@gmail.com"
+    assert expect == mockedDao.find()[0]
+
+def test_invalid_empty_email_format():
+    mockedDao = mock.MagicMock()
+    mockedDao.find.return_value = [{}] #Invalid format of emails should not return anything!
+
+    mockedSut = UserController(dao=mockedDao)
+    expect = {}
+    with pytest.raises(ValueError):
+        expect = mockedSut.get_user_by_email("")
+
+    assert expect == mockedDao.find()[0]
+
+def test_duplicate_emails():
+    mockedDao = mock.MagicMock()
+    mockedDao.find.return_value = [{'email': 'jane.doe@gmail.com'}, {'email': 'jane.doe@gmail.com'}] #Duplicates should not be allowed!
+
+    mockedSut = UserController(dao=mockedDao)
+    expect = mockedSut.get_user_by_email("jane.doe@gmail.com")
+
+    assert expect == mockedDao.find()[0]
+
+def test_valid_email_on_empty_database():
+    mockedDao = mock.MagicMock()
+    mockedDao.find.return_value = [] #Empty database or email not found
+
+    mockedSut = UserController(dao=mockedDao)
+    expect = []
     with pytest.raises(IndexError):
-        sut.get_user_by_email(email)
+        expect = mockedSut.get_user_by_email("jane.doe@gmail.com")
+    assert expect == mockedDao.find()
