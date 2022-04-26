@@ -11,7 +11,6 @@ class MockDB:
         # Collection variable
         collection = {}
 
-
         # connect to the MongoDB and select the appropriate database
         #print(f'Connecting to collection {collection_name} on MongoDB at url {MONGO_URL}')
         client = pymongo.MongoClient(MONGO_URL)
