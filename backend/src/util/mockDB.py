@@ -1,4 +1,4 @@
-import os, pymongo, json
+import os, pymongo
 from dotenv import dotenv_values
 from src.util.validators import getValidator
 
@@ -14,7 +14,7 @@ class MockDB:
         # connect to the MongoDB and select the appropriate database
         #print(f'Connecting to collection {collection_name} on MongoDB at url {MONGO_URL}')
         client = pymongo.MongoClient(MONGO_URL)
-        database = client.edutask
+        database = client['mock_edutask']
 
         # task collection
         if "mock_task" not in database.list_collection_names():
@@ -41,3 +41,10 @@ class MockDB:
             }
 
         return collection
+
+    def dbCleanUp():
+        LOCAL_MONGO_URL = dotenv_values('.env').get('MONGO_URL')
+        MONGO_URL = os.environ.get('MONGO_URL', LOCAL_MONGO_URL)
+
+        client = pymongo.MongoClient(MONGO_URL)
+        client.drop_database('mock_edutask')

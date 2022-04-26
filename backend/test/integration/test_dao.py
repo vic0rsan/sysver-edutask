@@ -131,3 +131,4 @@ def test_create_duplicate_item():
         "email": "jerry.doe@gmail.com",
         "task": ["test3", "test4", "test3"]
     }
+    MockDB.dbCleanUp()
