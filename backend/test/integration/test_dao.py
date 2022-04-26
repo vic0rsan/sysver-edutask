@@ -1,5 +1,6 @@
 import pytest, pymongo, json
 import unittest.mock as mock
+from bson.objectid import ObjectId
 from src.util.dao import DAO
 from src.util.mockDB import MockDB
 
@@ -8,28 +9,32 @@ def sutTask():
     collection = MockDB.dbSim()
     sut = DAO("task")
     sut.collection = collection['task']
-    return sut
+    yield sut
+    MockDB.dbCleanUp()
 
 @pytest.fixture
 def sutTodo():
     collection = MockDB.dbSim()
     sut = DAO("todo")
     sut.collection = collection['todo']
-    return sut
+    yield sut
+    MockDB.dbCleanUp()
 
 @pytest.fixture
 def sutUser():
     collection = MockDB.dbSim()
     sut = DAO("user")
     sut.collection = collection['user']
-    return sut
+    yield sut
+    MockDB.dbCleanUp()
 
 @pytest.fixture
 def sutVideo():
     collection = MockDB.dbSim()
     sut = DAO("video")
     sut.collection = collection['video']
-    return sut
+    yield sut
+    MockDB.dbCleanUp()
 
 def test_task_valid_create1(sutTask):
     data = {
@@ -115,20 +120,11 @@ def test_video_invalid_create1(sutVideo):
     with pytest.raises(pymongo.errors.WriteError):
         sutVideo.create(data)
 
-def test_create_collection_by_include_list(sutUser):
+def test_create_collection_include_list(sutUser):
     data = {
         "firstName": "Tom",
         "lastName": "Doe",
         "email": "tom.doe@gmail.com",
-        "tasks": []
+        "tasks": [ObjectId('6266d5402b885f6f03d4117b')]
     }
     sutUser.create(data)
-
-def test_create_duplicate_item():
-    data = {
-        "firstName": "Jerry",
-        "lastName": "Doe",
-        "email": "jerry.doe@gmail.com",
-        "task": ["test3", "test4", "test3"]
-    }
-    MockDB.dbCleanUp()
