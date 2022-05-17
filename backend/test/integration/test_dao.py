@@ -61,7 +61,7 @@ def test_task_valid_create2(sutTask):
 
 def test_task_invalid_create2(sutTask):
     data = {
-        "title": "Let's learn Vim",
+        "title": "Let's learn Vim"
     }
     with pytest.raises(pymongo.errors.WriteError):
         sutTask.create(data)
